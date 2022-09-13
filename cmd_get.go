@@ -2,29 +2,24 @@ package attendance
 
 import (
 	"github.com/spf13/cobra"
+	"log"
 	"os"
 	"path/filepath"
-	"strconv"
 )
 
 func newGetCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "get [id]",
+		Use:   "get [user]",
 		Short: "Get your attendance. If you not given arguments, it passes all week's attendance.",
 		RunE:  execGetCmd,
 	}
 }
 
 func execGetCmd(_ *cobra.Command, args []string) error {
-	id := 0
+	user := ""
 	if len(args) != 0 {
-		rawID, err := strconv.Atoi(args[0])
-		if err != nil {
-			return err
-		}
-		id = rawID
+		user = args[0]
 	}
-
 	homedir, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -35,14 +30,24 @@ func execGetCmd(_ *cobra.Command, args []string) error {
 		return err
 	}
 	path := filepath.Join(workDir, "attendance_data.json")
-	lstat, err := os.Lstat(path)
+
+	_, err = os.Lstat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.Create()
+			err = touch(path)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
 		}
-		return err
 	}
 
-	read()
+	data, err := read(path)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	log.Println(user)
+	log.Println(data)
 	return nil
 }

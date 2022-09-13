@@ -14,6 +14,7 @@ func NewAttendanceCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		newGetCmd(),
+		newCreateCmd(),
 	)
 
 	return cmd

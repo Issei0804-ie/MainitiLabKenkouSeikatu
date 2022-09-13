@@ -16,46 +16,76 @@ func newModel(user string, week time.Time) Model {
 	}
 }
 
-type Model struct {
-	User       string
-	Week       time.Time
-	TimeWorked MinWorked
+type Data struct {
+	Models []Model
 }
 
-func (d *Model) AddTimeWorked(timeWorked MinWorked) {
+func (d Data) byUser(user string) []Model {
+	var filtered []Model
+	for _, model := range d.Models {
+		if model.User == user {
+			filtered = append(filtered, model)
+		}
+	}
+	return filtered
+}
+
+type Model struct {
+	ID         int
+	User       string
+	BeginWeek  time.Time
+	EndWeek    time.Time
+	TimeWorked TimeWorked
+}
+
+func (d *Model) AddTimeWorked(timeWorked TimeWorked) {
 	d.TimeWorked = d.TimeWorked.add(timeWorked)
 }
 
-type MinWorked struct {
+type TimeWorked struct {
 	Value int
 }
 
-func newTimeWorked(value int) (MinWorked, error) {
+func newTimeWorked(value int) (TimeWorked, error) {
 	if value < 0 {
-		return MinWorked{}, errors.New("illegal value")
+		return TimeWorked{}, errors.New("illegal value")
 	}
-	return MinWorked{Value: value}, nil
+	return TimeWorked{Value: value}, nil
 }
 
-func (d MinWorked) add(other MinWorked) MinWorked {
-	return MinWorked{Value: d.Value + other.Value}
+func (d TimeWorked) add(other TimeWorked) TimeWorked {
+	return TimeWorked{Value: d.Value + other.Value}
 }
 
-func read(path string) ([]Model, error) {
+func setID(models []Model) []Model {
+	var set []Model
+
+	for i, model := range models {
+		model.ID = i + 1
+		set = append(set, model)
+	}
+	return set
+}
+
+func read(path string) (Data, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return Data{}, err
 	}
-	var models []Model
-	err = json.Unmarshal(body, &models)
+	var data Data
+	err = json.Unmarshal(body, &data)
 	if err != nil {
-		return nil, err
+		switch err.(type) {
+		case *json.InvalidUnmarshalError:
+			return Data{}, nil
+		}
 	}
-	return models, nil
+
+	return data, nil
 }
 
-func write(path string, models Model) (bool, error) {
-	marshaled, err := json.Marshal(models)
+func write(path string, data Data) (bool, error) {
+	marshaled, err := json.Marshal(data)
 	if err != nil {
 		return false, err
 	}
@@ -64,4 +94,13 @@ func write(path string, models Model) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func touch(path string) error {
+	_, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	_, err = write(path, Data{})
+	return err
 }
