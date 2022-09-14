@@ -3,15 +3,34 @@ package attendance
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
-func newModel(user string, week time.Time) Model {
+var DataFile = ""
+
+func init() {
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	workDir := filepath.Join(homedir, ".config", "com", "issei0804")
+	err = os.MkdirAll(workDir, 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	path := filepath.Join(workDir, "attendance_data.json")
+	DataFile = path
+}
+
+func newModel(user string, begin time.Time, end time.Time) Model {
 	timeWorker, _ := newTimeWorked(0)
 	return Model{
 		User:       user,
-		Week:       week,
+		BeginWeek:  begin,
+		EndWeek:    end,
 		TimeWorked: timeWorker,
 	}
 }
@@ -84,16 +103,16 @@ func read(path string) (Data, error) {
 	return data, nil
 }
 
-func write(path string, data Data) (bool, error) {
+func write(path string, data Data) error {
 	marshaled, err := json.Marshal(data)
 	if err != nil {
-		return false, err
+		return err
 	}
 	err = os.WriteFile(path, marshaled, 0644)
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, nil
+	return nil
 }
 
 func touch(path string) error {

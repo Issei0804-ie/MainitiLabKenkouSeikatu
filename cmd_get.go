@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 )
 
+func
+
 func newGetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "get [user]",
@@ -20,18 +22,8 @@ func execGetCmd(_ *cobra.Command, args []string) error {
 	if len(args) != 0 {
 		user = args[0]
 	}
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		return err
-	}
-	workDir := filepath.Join(homedir, ".config", "com", "issei0804")
-	err = os.MkdirAll(workDir, 0755)
-	if err != nil {
-		return err
-	}
-	path := filepath.Join(workDir, "attendance_data.json")
 
-	_, err = os.Lstat(path)
+	_, err := os.Lstat(DataFile)
 	if err != nil {
 		if os.IsNotExist(err) {
 			err = touch(path)

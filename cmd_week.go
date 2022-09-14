@@ -1,8 +1,8 @@
 package attendance
 
 import (
-	"errors"
 	"github.com/spf13/cobra"
+	"log"
 	"strings"
 	"time"
 )
@@ -38,5 +38,18 @@ func execCreateWeek(_ *cobra.Command, args []string) error {
 		EndWeek:    endWeek,
 		TimeWorked: TimeWorked{},
 	}
-	return errors.New("hoge")
+
+	data, err := read(DataFile)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	data.Models = append(data.Models, model)
+	err = write(DataFile, data)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
