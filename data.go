@@ -116,6 +116,16 @@ func write(path string, data Data) error {
 	return nil
 }
 
+func update(timeWorked TimeWorked, weekID int, models []Model) ([]Model, error) {
+	for i := 0; i < len(models); i++ {
+		if models[i].ID == weekID {
+			models[i].TimeWorked = models[i].TimeWorked.add(timeWorked)
+			return models, nil
+		}
+	}
+	return nil, errors.New("the week id is not found")
+}
+
 func touch(path string) error {
 	_, err := os.Create(path)
 	if err != nil {
