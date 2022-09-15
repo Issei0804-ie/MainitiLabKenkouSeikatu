@@ -1,10 +1,9 @@
 package attendance
 
 import (
+	"errors"
 	"github.com/spf13/cobra"
 	"log"
-	"strings"
-	"time"
 )
 
 func newCreateWeekCmd() *cobra.Command {
@@ -17,25 +16,22 @@ func newCreateWeekCmd() *cobra.Command {
 }
 
 func execCreateWeek(_ *cobra.Command, args []string) error {
+	if len(args) != 2 {
+		return errors.New("invalid argument")
+	}
 	user := args[0]
 	rawWeek := args[1]
-
-	layout := "20060102"
-	splinted := strings.Split(rawWeek, "-")
-	beginWeek, err := time.Parse(layout, splinted[0])
+	begin, end, err := parseWeek(rawWeek)
 	if err != nil {
-		return err
-	}
-	endWeek, err := time.Parse(layout, splinted[1])
-	if err != nil {
+		log.Println(err)
 		return err
 	}
 
 	model := Model{
 		ID:         0,
 		User:       user,
-		BeginWeek:  beginWeek,
-		EndWeek:    endWeek,
+		BeginWeek:  begin,
+		EndWeek:    end,
 		TimeWorked: TimeWorked{},
 	}
 

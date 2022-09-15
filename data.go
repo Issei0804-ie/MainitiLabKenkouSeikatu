@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -122,4 +123,19 @@ func touch(path string) error {
 	}
 	err = write(path, Data{})
 	return err
+}
+
+func parseWeek(rawWeek string) (time.Time, time.Time, error) {
+
+	layout := "20060102"
+	splinted := strings.Split(rawWeek, "-")
+	beginWeek, err := time.Parse(layout, splinted[0])
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+	endWeek, err := time.Parse(layout, splinted[1])
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+	return beginWeek, endWeek, nil
 }
