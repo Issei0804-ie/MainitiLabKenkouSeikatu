@@ -120,6 +120,6 @@ func touch(path string) error {
 	if err != nil {
 		return err
 	}
-	_, err = write(path, Data{})
+	err = write(path, Data{})
 	return err
 }

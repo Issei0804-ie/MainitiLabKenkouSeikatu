@@ -4,10 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
-	"path/filepath"
 )
-
-func
 
 func newGetCmd() *cobra.Command {
 	return &cobra.Command{
@@ -26,7 +23,7 @@ func execGetCmd(_ *cobra.Command, args []string) error {
 	_, err := os.Lstat(DataFile)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err = touch(path)
+			err = touch(DataFile)
 			if err != nil {
 				log.Println(err)
 				return err
@@ -34,7 +31,7 @@ func execGetCmd(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	data, err := read(path)
+	data, err := read(DataFile)
 	if err != nil {
 		log.Println(err)
 		return err
